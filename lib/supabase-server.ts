@@ -52,15 +52,11 @@ export function createClient() {
 // Service-role client for trusted server-side sync jobs. Bypasses RLS, so it
 // must only ever be used inside API routes, never shipped to the browser.
 export function createAdminClient() {
-  if (
-    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.SUPABASE_SERVICE_ROLE_KEY
-  ) {
-    return null;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+  if (!SUPABASE_URL || !serviceKey) {
+      return null;
   }
-  return createServiceRoleClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY,
-    { auth: { persistSession: false } }
-  );
+  return createServiceRoleClient(SUPABASE_URL, serviceKey, {
+    auth: { persistSession: false },
+  });
 }
