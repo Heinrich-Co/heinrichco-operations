@@ -4,6 +4,24 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase";
 
+// Turn an opaque auth/network error into something actionable. A browser
+// "Failed to fetch" means the request never reached Supabase — almost always a
+// wrong NEXT_PUBLIC_SUPABASE_URL (dashboard URL instead of the Project API URL),
+// env vars that weren't redeployed, or a paused project.
+function describeAuthError(raw: string): string {
+  const m = (raw || "").toLowerCase();
+  if (m.includes("failed to fetch") || m.includes("networkerror") || m.includes("load failed")) {
+    return "Couldn't reach the authentication server. Check that NEXT_PUBLIC_SUPABASE_URL is the Project API URL (https://<ref>.supabase.co, not the dashboard URL), redeploy after changing env vars, and confirm the Supabase project isn't paused.";
+  }
+  if (m.includes("invalid login") || m.includes("invalid credentials")) {
+    return "Incorrect email or password.";
+  }
+  if (m.includes("email not confirmed")) {
+    return "This email hasn't been confirmed yet. Confirm it from the Supabase Auth dashboard, or disable email confirmation for internal use.";
+  }
+  return raw || "Sign-in failed. Check the app configuration.";
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -27,14 +45,14 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
         setIsError(true);
-        setMessage(error.message);
+        setMessage(describeAuthError(error.message));
       } else {
         router.push("/");
         router.refresh();
       }
     } catch (err) {
       setIsError(true);
-      setMessage(err instanceof Error ? err.message : "Sign-in failed. Check the app configuration.");
+      setMessage(describeAuthError(err instanceof Error ? err.message : ""));
     } finally {
       setBusy(false);
     }
@@ -58,12 +76,12 @@ export default function LoginPage() {
         setMessage(
           error.message.includes("provider")
             ? "Google sign-in isn't enabled yet. Enable the Google provider in Supabase first, or use email + password."
-            : error.message
+            : describeAuthError(error.message)
         );
       }
-    } catch {
+    } catch (err) {
       setIsError(true);
-      setMessage("Google sign-in isn't set up yet. Use email + password for now.");
+      setMessage(describeAuthError(err instanceof Error ? err.message : ""));
     }
   };
 
