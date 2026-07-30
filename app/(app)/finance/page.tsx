@@ -56,6 +56,16 @@ export default function FinancePage() {
     toast("Invoice captured — added to the ledger as pending");
   };
 
+  // "View Invoice" opens the Drive link when the payable has one; otherwise
+  // there's no document to show yet.
+  const viewInvoice = (p: Payable) => {
+    if (p.driveLink) {
+      window.open(p.driveLink, "_blank", "noopener,noreferrer");
+    } else {
+      toast(`No invoice document linked yet — ${p.vendor}`);
+    }
+  };
+
   const kpis = [
     { label: "Pending", value: String(pending.length), sub: `€ ${pendTotal.toLocaleString()} total` },
     { label: "Overdue", value: String(overdue.length), sub: overdue.length ? "Action needed" : "Nothing past due" },
@@ -95,9 +105,16 @@ export default function FinancePage() {
                 <div className="txt">
                   <div className="t">
                     {p.vendor} — {p.amount}
+                    {p.invoiceNumber ? ` · #${p.invoiceNumber}` : ""}
                   </div>
                   <div className="d">
-                    {p.category} · <Chip variant={p.status as "pending" | "overdue"}>{p.status}</Chip>
+                    {p.category}
+                    {p.due ? ` · due ${p.due}` : ""} ·{" "}
+                    <Chip variant={p.status as "pending" | "overdue"}>{p.status}</Chip>
+                    {p.description ? (
+                      <div style={{ marginTop: 2, color: "var(--gray-l)" }}>{p.description}</div>
+                    ) : null}
+
                   </div>
                 </div>
               </div>
@@ -105,10 +122,7 @@ export default function FinancePage() {
                 <button className="btn sm" onClick={() => markPaid(p.id)}>
                   Mark Paid
                 </button>
-                <button
-                  className="btn sm ghost"
-                  onClick={() => toast(`Opening invoice — ${p.vendor}`)}
-                >
+                <button className="btn sm ghost" onClick={() => viewInvoice(p)}>
                   View Invoice
                 </button>
               </div>
