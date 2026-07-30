@@ -65,23 +65,39 @@ CREATE TABLE IF NOT EXISTS campaigns (
 );
 
 -- Invoices (synced from Google Sheet "Payables")
+-- days_left is TEXT on purpose: the Payables sheet stores free-form values like
+-- "Overdue", "Due today" or "12" — never coerce it to a number.
 CREATE TABLE IF NOT EXISTS invoices (
   id SERIAL PRIMARY KEY,
   date_received DATE,
+  invoice_date DATE,
   vendor TEXT NOT NULL,
   invoice_number TEXT,
   amount DECIMAL,
+  amount_eur DECIMAL,
   currency TEXT DEFAULT 'EUR',
   due_date DATE,
-  days_left INTEGER,
+  days_left TEXT,
   status TEXT DEFAULT 'Pending'
     CHECK (status IN ('Pending', 'Overdue', 'Paid')),
   category TEXT,
+  description TEXT,
+  drive_link TEXT,
+  msg_id TEXT,
   notes TEXT,
   email_subject TEXT,
   sheet_row INTEGER UNIQUE,
   synced_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- Backfill for databases created before these columns existed (safe to re-run).
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS invoice_date DATE;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS amount_eur DECIMAL;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS drive_link TEXT;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS msg_id TEXT;
+-- days_left was INTEGER in an earlier revision — widen it to TEXT.
+ALTER TABLE invoices ALTER COLUMN days_left TYPE TEXT USING days_left::TEXT;
 
 -- Recurring Subscriptions
 CREATE TABLE IF NOT EXISTS recurring (
