@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useUI } from "@/components/AppProviders";
+import { useLiveResource } from "@/lib/use-live-resource";
 import { canSeeFinance } from "@/lib/roles";
 import Card from "@/components/shared/Card";
 import Kpi from "@/components/shared/Kpi";
@@ -17,8 +18,16 @@ import { Payable } from "@/lib/types";
 
 export default function FinancePage() {
   const { user, toast } = useUI();
+  // Real payables: live from the `invoices` table when Supabase is configured,
+  // seeded with sample data otherwise. Local state carries optimistic edits
+  // (mark-paid, captured invoice) on top of the fetched data.
+  const { data: livePayables } = useLiveResource<Payable>("invoices", PAYABLES);
   const [payables, setPayables] = useState<Payable[]>(PAYABLES);
   const [recurringOpen, setRecurringOpen] = useState(true);
+
+  useEffect(() => {
+    setPayables(livePayables);
+  }, [livePayables]);
 
   const pending = useMemo(() => payables.filter((p) => p.status === "pending"), [payables]);
   const overdue = useMemo(() => payables.filter((p) => p.status === "overdue"), [payables]);
