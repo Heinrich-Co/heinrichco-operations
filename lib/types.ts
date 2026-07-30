@@ -61,6 +61,12 @@ export interface Payable {
   category: string;
   amount: string;
   status: PayableStatus;
+  // Real payables enrichment (present when synced from the Payables sheet).
+  invoiceNumber?: string;
+  invoiceDate?: string;
+  due?: string; // due date or free-form "days left" text
+  description?: string;
+  driveLink?: string; // "View Invoice" opens this
 }
 
 export interface Recurring {
