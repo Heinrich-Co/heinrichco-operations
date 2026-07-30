@@ -144,12 +144,12 @@ export const BOOKINGS: Booking[] = [
 ];
 
 export const PAYABLES: Payable[] = [
-  { id: "ana", vendor: "Ana Ribeiro", category: "Freelancing", amount: "€ 2,784", status: "pending" },
-  { id: "genzone", vendor: "GenZone LLC", category: "Consultant", amount: "€ 1,120", status: "pending" },
-  { id: "igor", vendor: "Igor Kretteis ME", category: "Freelancing", amount: "€ 846", status: "pending" },
-  { id: "anthropic", vendor: "Anthropic", category: "Software", amount: "€ 68", status: "paid" },
-  { id: "gws", vendor: "Google Workspace", category: "Software", amount: "€ 49", status: "paid" },
-  { id: "vercel", vendor: "Vercel", category: "Software", amount: "€ 20", status: "paid" },
+  { id: "ana", vendor: "Ana Ribeiro", category: "Freelancing", amount: "€ 2,784", status: "pending", invoiceNumber: "AR-2026-041", invoiceDate: "2026-07-18", due: "2026-08-01", description: "Content design retainer — July.", driveLink: "https://drive.google.com/file/d/sample-ana/view" },
+  { id: "genzone", vendor: "GenZone LLC", category: "Consultant", amount: "€ 1,120", status: "pending", invoiceNumber: "GZ-8842", invoiceDate: "2026-07-20", due: "2026-08-02", description: "AI advisory — Q3 kickoff.", driveLink: "https://drive.google.com/file/d/sample-genzone/view" },
+  { id: "igor", vendor: "Igor Kretteis ME", category: "Freelancing", amount: "€ 846", status: "pending", invoiceNumber: "IK-114", invoiceDate: "2026-07-22", due: "2026-08-05", description: "Design — proposal covers & social assets.", driveLink: "https://drive.google.com/file/d/sample-igor/view" },
+  { id: "anthropic", vendor: "Anthropic", category: "Software", amount: "€ 68", status: "paid", invoiceNumber: "ANT-90211", invoiceDate: "2026-07-01", due: "2026-07-01", description: "Claude API — July.", driveLink: "https://drive.google.com/file/d/sample-anthropic/view" },
+  { id: "gws", vendor: "Google Workspace", category: "Software", amount: "€ 49", status: "paid", invoiceNumber: "GWS-55120", invoiceDate: "2026-07-03", due: "2026-07-03", description: "Workspace seats — July." },
+  { id: "vercel", vendor: "Vercel", category: "Software", amount: "€ 20", status: "paid", invoiceNumber: "VRC-33019", invoiceDate: "2026-07-05", due: "2026-07-05", description: "Hosting — Pro plan." },
 ];
 
 export const FIN_CATS: ChartDatum[] = [
