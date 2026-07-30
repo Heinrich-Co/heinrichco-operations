@@ -31,12 +31,20 @@ function mapLead(row: Record<string, any>, i: number): Lead {
 // Map a Supabase `invoices` row to the UI Payable shape.
 function mapInvoice(row: Record<string, any>): Payable {
   const status = String(row.status ?? "Pending").toLowerCase();
+  // amount_eur is the normalized EUR figure; fall back to amount for older rows.
+  const value = Number(row.amount_eur ?? row.amount ?? 0);
   return {
     id: String(row.id),
     vendor: row.vendor ?? "",
     category: row.category ?? "",
-    amount: `€ ${Number(row.amount ?? 0).toLocaleString()}`,
-    status: (status === "paid" ? "paid" : status === "overdue" ? "overdue" : "pending"),
+    amount: `€ ${value.toLocaleString()}`,
+    status: status === "paid" ? "paid" : status === "overdue" ? "overdue" : "pending",
+    invoiceNumber: row.invoice_number ?? undefined,
+    invoiceDate: row.invoice_date ?? row.date_received ?? undefined,
+    // Prefer a real due date; fall back to the free-form days_left text.
+    due: row.due_date ?? row.days_left ?? undefined,
+    description: row.description ?? undefined,
+    driveLink: row.drive_link ?? undefined,
   };
 }
 
