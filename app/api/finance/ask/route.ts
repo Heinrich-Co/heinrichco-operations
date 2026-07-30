@@ -35,6 +35,10 @@ export async function POST(req: NextRequest) {
       category: p.category,
       amount: p.amount,
       status: p.status,
+      invoice_number: p.invoiceNumber,
+      invoice_date: p.invoiceDate,
+      due: p.due,
+      description: p.description,
     }));
     const msg = await anthropic.messages.create({
       model: DARWIN_MODEL,
@@ -76,6 +80,23 @@ function localAnswer(question: string, payables: Payable[]): string {
   if (q.includes("most") || q.includes("largest") || q.includes("biggest") || q.includes("vendor") || q.includes("who")) {
     const top = [...payables].sort((a, b) => parseAmt(b.amount) - parseAmt(a.amount))[0];
     return top ? `Largest payable: ${top.vendor} — ${top.amount} (${top.category}, ${top.status}).` : "No payables loaded.";
+  }
+  if (q.includes("due") || q.includes("when")) {
+    const withDue = payables.filter((p) => p.status !== "paid" && p.due);
+    return withDue.length
+      ? withDue.map((p) => `${p.vendor} — ${p.amount}, due ${p.due}${p.invoiceNumber ? ` (#${p.invoiceNumber})` : ""}.`).join(" ")
+      : "No due dates on the outstanding payables.";
+  }
+  // Look up a specific vendor by name, returning its enriched detail.
+  const named = payables.find((p) => p.vendor && q.includes(p.vendor.toLowerCase().split(" ")[0]));
+  if (named) {
+    const bits = [
+      `${named.vendor} — ${named.amount} (${named.status})`,
+      named.invoiceNumber ? `invoice #${named.invoiceNumber}` : "",
+      named.due ? `due ${named.due}` : "",
+      named.description ? `— ${named.description}` : "",
+    ].filter(Boolean);
+    return bits.join(", ").replace(", —", " —") + ".";
   }
   if (q.includes("total") || q.includes("how much")) {
     return `Across ${payables.length} invoices: € ${sum(payables).toLocaleString()} total · € ${sum(pending).toLocaleString()} pending · € ${sum(overdue).toLocaleString()} overdue.`;
